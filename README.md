@@ -1,1 +1,1 @@
-# MultiTwitchMVC
+# MadMultiTwitch
