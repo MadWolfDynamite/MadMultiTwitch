@@ -1,123 +1,10 @@
 ﻿@model StreamViewModel
 
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            optimiseStreamEmbeds(@Model.Streams.Count, '@Model.ShowChat');
-            $('#options-wrapper').moveToAbsoluteCenter();
-
-            $(".chat-tab-content div").first().addClass("active");
-            $(".chat-tabs li").first().addClass("active");
-
-            $('#chat-wrapper .chat-tabs').on('click', 'a', function(e) {
-                var selectedAttrValue = $(this).attr('href');
-
-                $(selectedAttrValue).show().siblings().hide();
-
-                $(this).parent('li').addClass('active').siblings().removeClass('active');
-
-                e.preventDefault();
-            });
-
-            $('#options-toggle').on('click', function(e) {
-                e.preventDefault();
-                toggleOptionsPanel();
-            });
-
-            $('#chat-toggle').on('click', function(e) {
-                e.preventDefault();
-
-                var showChatWindow = toggleChatWindow();
-                optimiseStreamEmbeds(-1, showChatWindow);
-            });
-
-            $('#light-dark-toggle').on('click', function(e) {
-                e.preventDefault();
-
-                let title = $(this).text() == 'Dark Mode'
-                    ? 'Light Mode'
-                    : 'Dark Mode';
-
-                $(this).text(title);
-            });
-
-            $('#options-wrapper .stream-options').on('change', '.stream-checkbox', updateParsedList);
-
-            $('#add-stream').on('click', function (e) {
-                e.preventDefault();
-                var val = $('#stream-selector').val().trim();
-                console.log(val);
-
-                if (val.includes(',')) {
-                    console.log('Comma list detected');
-                    var arr = val.split(',').filter(element => element);
-
-                    for (let i = 0; i < arr.length; i++) {
-                        addStreamToList(arr[i]);
-                    }
-                }
-                else {
-                    addStreamToList(val);
-                }
-
-                $('#stream-selector').val('');
-
-                updateParsedList();
-            });
-
-            $('#cancel-update').on('click', function(e) {
-                e.preventDefault();
-                toggleOptionsPanel();
-
-                $('.stream-options li').remove();
-
-                let originalVals = '@ViewData["ParsedList"]'.split(',').filter(element => element);
-
-                for (let i = 0; i < originalVals.length; i++) {
-                    addStreamToList(originalVals[i]);
-                }
-
-                $('#options-wrapper').moveToAbsoluteCenter();
-            });
-
-            $(window).resize(function () {
-                var showChatWindow = $('#chat-wrapper').css('display') === 'block'
-                    ? 'True'
-                    : 'False';
-
-                optimiseStreamEmbeds(-1, showChatWindow);
-                $('#options-wrapper').moveToAbsoluteCenter();
-            });
-        });
-
-        function addStreamToList(stream) {
-            let element = '<input type="checkbox" name="' + stream + '" id="' + stream + '" class="stream-checkbox" checked />';
-            element += '\n<label for="' + stream + '">' + stream + '</label>';
-
-            $('.stream-options').append($('<li>').html(element));
-        }
-
-        function updateParsedList() {
-            let value = '';
-
-            $('.stream-checkbox').each(function() {
-                if ($(this).prop('checked')) {
-                    value += $(this).prop('name') + ',';
-                }
-            });
-
-            $('#parsed-streamlist').val(value);
-
-            $('#options-wrapper').moveToAbsoluteCenter();
-        }
-    </script>
-}
-
 <div id="settings-wrapper">
     @{
         var modeToggleTitle = Model.DarkMode
-            ? "Light Mode"
-            : "Dark Mode";
+            ? "Dark Mode"
+            : "Light Mode";
     }
 
     <ul class="settings-tabs">
@@ -199,3 +86,119 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            optimiseStreamEmbeds(@Model.Streams.Count, '@Model.ShowChat');
+            $('#options-wrapper').moveToAbsoluteCenter();
+
+            $(".chat-tab-content div").first().addClass("active");
+            $(".chat-tabs li").first().addClass("active");
+
+            $('#chat-wrapper .chat-tabs').on('click', 'a', function (e) {
+                var selectedAttrValue = $(this).attr('href');
+
+                $(selectedAttrValue).show().siblings().hide();
+
+                $(this).parent('li').addClass('active').siblings().removeClass('active');
+
+                e.preventDefault();
+            });
+
+            $('#options-toggle').on('click', function (e) {
+                e.preventDefault();
+                toggleOptionsPanel();
+            });
+
+            $('#chat-toggle').on('click', function (e) {
+                e.preventDefault();
+
+                var showChatWindow = toggleChatWindow();
+                optimiseStreamEmbeds(-1, showChatWindow);
+            });
+
+            $('#light-dark-toggle').on('click', function (e) {
+                e.preventDefault();
+
+                if ($(this).text() === 'Dark Mode') {
+                    togglePageTheme('light');
+                    $(this).text('Light Mode');
+                }
+                else {
+                    togglePageTheme('dark');
+                    $(this).text('Dark Mode');
+                }
+            });
+
+            $('#options-wrapper .stream-options').on('change', '.stream-checkbox', updateParsedList);
+
+            $('#add-stream').on('click', function (e) {
+                e.preventDefault();
+                var val = $('#stream-selector').val().trim();
+                console.log(val);
+
+                if (val.includes(',')) {
+                    console.log('Comma list detected');
+                    var arr = val.split(',').filter(element => element);
+
+                    for (let i = 0; i < arr.length; i++) {
+                        addStreamToList(arr[i]);
+                    }
+                }
+                else {
+                    addStreamToList(val);
+                }
+
+                $('#stream-selector').val('');
+
+                updateParsedList();
+            });
+
+            $('#cancel-update').on('click', function (e) {
+                e.preventDefault();
+                toggleOptionsPanel();
+
+                $('.stream-options li').remove();
+
+                let originalVals = '@ViewData["ParsedList"]'.split(',').filter(element => element);
+
+                for (let i = 0; i < originalVals.length; i++) {
+                    addStreamToList(originalVals[i]);
+                }
+
+                $('#options-wrapper').moveToAbsoluteCenter();
+            });
+
+            $(window).resize(function () {
+                var showChatWindow = $('#chat-wrapper').css('display') === 'block'
+                    ? 'True'
+                    : 'False';
+
+                optimiseStreamEmbeds(-1, showChatWindow);
+                $('#options-wrapper').moveToAbsoluteCenter();
+            });
+        });
+
+        function addStreamToList(stream) {
+            let element = '<input type="checkbox" name="' + stream + '" id="' + stream + '" class="stream-checkbox" checked />';
+            element += '<label for="' + stream + '">' + stream + '</label>';
+
+            $('.stream-options').append($('<li>').html(element));
+        }
+
+        function updateParsedList() {
+            let value = '';
+
+            $('.stream-checkbox').each(function () {
+                if ($(this).prop('checked')) {
+                    value += $(this).prop('name') + ',';
+                }
+            });
+
+            $('#parsed-streamlist').val(value);
+
+            $('#options-wrapper').moveToAbsoluteCenter();
+        }
+    </script>
+}
