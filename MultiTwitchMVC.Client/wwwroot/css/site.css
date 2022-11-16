@@ -1,5 +1,32 @@
+:root {
+    /* Dark Mode UI */
+    --main-background-dark: linear-gradient(180deg, rgb(0, 0, 0), rgb(10, 10, 10));
+    --border-color-dark: rgb(35, 35, 35);
+    --font-color-dark: rgb(255, 255, 255);
+    --settings-dark: rgb(0, 0, 0);
+    --stream-options-dark: linear-gradient(180deg, rgba(0, 0, 0, .75), rgba(10, 10, 10, .75));
+    --overlay-dark: rgba(0, 0, 0, .85);
+    --chat-tabs-dark: linear-gradient(0deg, rgb(15,15,15), rgb(55,55,55));
+    /* Light Mode UI  */
+    --main-background-light: linear-gradient(180deg, rgb(255, 255, 255), rgb(245, 245, 245));
+    --border-color-light: rgb(220, 220, 220);
+    --font-color-light: rgb(0, 0, 0);
+    --settings-light: rgb(255, 255, 255);
+    --stream-options-light: linear-gradient(180deg, rgba(255, 255, 255, .75), rgba(245, 245, 245, .75));
+    --overlay-light: rgba(255, 255, 255, .85);
+    --chat-tabs-light: linear-gradient(0deg, rgb(240, 240, 240), rgb(200, 200, 200));
+}
+
 html {
     font: 14px arial, sans-serif;
+    /* Variables */
+    --main-background: var(--main-background-dark, #000);
+    --border-color: var(--border-color-dark, #232323);
+    --font-color: var(--font-color-dark, #fff);
+    --settings: var(--settings-dark, #000);
+    --stream-options: var(--stream-options-dark, #000);
+    --overlay: var(--overlay-dark, #000);
+    --chat-tabs: var(--chat-tabs-dark, #0F0F0F);
 }
 
 @media (min-width: 768px) {
@@ -15,15 +42,15 @@ html {
 
 body {
     background: #000;
-    background: linear-gradient(180deg, rgb(0, 0, 0), rgb(10, 10, 10));
-    color: #fff;
+    background: var(--main-background, #000);
+    color: var(--font-color, #fff);
     margin: 0 5px;
     margin-bottom: 10px;
 }
 
 a,
 a:visited {
-    color: #fff;
+    color: var(--font-color, #fff);
     cursor: pointer;
     text-decoration: none;
     transition: background 150ms, color 150ms;
@@ -41,7 +68,7 @@ iframe {
 
 hr {
     width: 90%;
-    border: 1px solid #222;
+    border: 1px solid var(--border-color, #232323);
 }
 
 #help-wrapper {
@@ -52,7 +79,7 @@ hr {
     width: 30%;
     max-width: 600px;
     margin: 0 auto;
-    border: 2px solid #222;
+    border: 2px solid var(--border-color, #232323);
     border-radius: 10px;
 }
 
@@ -76,21 +103,28 @@ hr {
     margin: 0 auto;
 }
 
-#form-wrapper .form-label {
+.form-label {
     width: 100%;
+    color: var(--border-color, #232323);
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+#form-wrapper .form-label {
     display: block;
     margin: 0 15px;
 }
 
 .form-field {
-    color: #fff;
+    color: var(--font-color, #fff);
     background: none;
     width: 100%;
     display: block;
     margin: 0 10px;
     margin-bottom: 5px;
     padding: 10px 7.5px;
-    border: 2px solid #222;
+    border: 2px solid var(--border-color, #232323);
     border-radius: 5px;
     font-size: 13px;
     box-sizing: border-box;
@@ -103,13 +137,15 @@ hr {
 .form-button {
     width: 100%;
     margin: 0 10px;
-    color: #fff;
+    color: var(--font-color-dark, #fff);
     background: #1f1f1f;
     background: rgba(125, 125, 125, .15);
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
     font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
     transition: background 250ms;
     transition-timing-function: linear;
 }
@@ -140,6 +176,8 @@ hr {
 .form-checklabel {
     width: 90%;
     display: inline-block;
+    font-weight: 600;
+    padding: 5px 0;
 }
 
 #stream-wrapper {
@@ -155,15 +193,15 @@ hr {
     margin: 0;
     padding: 0;
     display: inline-block;
-    border: 1px solid #222;
+    border: 1px solid var(--border-color, #232323);
     border-radius: 4px;
 }
 
 .chat-tabs {
     margin: 0;
     padding: 0;
-    background: rgb(17,17,17);
-    background: linear-gradient(0deg, rgb(17,17,17), rgb(57, 57, 57));
+    background: #0F0F0F;
+    background: var(--chat-tabs, #0F0F0F);
     border-radius: 4px 4px 0 0;
 }
 
@@ -187,7 +225,7 @@ hr {
     background: rgba(150, 150, 150, .15);
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: var(--font-color, #fff);
     border-radius: 4px 4px 0 0;
 }
 
@@ -199,8 +237,8 @@ hr {
 
 li.active a, li.active a:hover {
     background: #6a4e9e;
-    background: rgba(106, 78, 158, .65);
-    color: #fff;
+    background: rgba(106, 78, 158, .45);
+    color: var(--font-color, #fff);
 }
 
 .chat-tab-content {
@@ -225,7 +263,7 @@ li.active a, li.active a:hover {
 .settings-tabs {
     margin: 0;
     padding: 0;
-    background: #000;
+    background: var(--settings, #000);
 }
 
 .settings-tabs li {
@@ -233,7 +271,7 @@ li.active a, li.active a:hover {
     padding: 0 5px;
     float: left;
     list-style: none;
-    border-left: 2px solid #fff;
+    border-left: 2px solid var(--font-color, #fff);
 }
 
 .settings-tabs li:first-child {
@@ -251,21 +289,16 @@ li.active a, li.active a:hover {
     width: 45%;
     max-width: 750px;
     padding: 5px;
-    border: 2px solid #222;
+    border: 2px solid var(--border-color, #232323);
     border-radius: 10px;
     background: #000;
-    background: linear-gradient(180deg, rgba(0, 0, 0, .75), rgba(10, 10, 10, .75));
+    background: var(--stream-options, #000);
     backdrop-filter: blur(5px);
 }
 
 #options-wrapper .form-label {
-    width: 100%;
     display: inline-block;
     margin: 0 15px;
-    color: #222;
-    font-size: 15px;
-    font-weight: 600;
-    text-transform: uppercase;
 }
 
 #options-wrapper .form-button,
@@ -295,7 +328,7 @@ li.active a, li.active a:hover {
     display: none;
     z-index: 50;
     background: #000;
-    background: rgba(0, 0, 0, .85);
+    background: var(--overlay, #000);
     position: absolute;
 }
 

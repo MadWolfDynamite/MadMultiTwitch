@@ -3,8 +3,8 @@
 <div id="settings-wrapper">
     @{
         var modeToggleTitle = Model.DarkMode
-            ? "Light Mode"
-            : "Dark Mode";
+            ? "Dark Mode"
+            : "Light Mode";
     }
 
     <ul class="settings-tabs">
@@ -121,11 +121,14 @@
             $('#light-dark-toggle').on('click', function (e) {
                 e.preventDefault();
 
-                let title = $(this).text() == 'Dark Mode'
-                    ? 'Light Mode'
-                    : 'Dark Mode';
-
-                $(this).text(title);
+                if ($(this).text() === 'Dark Mode') {
+                    togglePageTheme('light');
+                    $(this).text('Light Mode');
+                }
+                else {
+                    togglePageTheme('dark');
+                    $(this).text('Dark Mode');
+                }
             });
 
             $('#options-wrapper .stream-options').on('change', '.stream-checkbox', updateParsedList);

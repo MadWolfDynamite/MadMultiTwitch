@@ -1,21 +1,19 @@
-﻿var activeStreams = -1;
+﻿const root = $('html');
+var activeStreams = -1;
 
 function optimiseStreamEmbeds(streamCount, showChat) {
-    if (streamCount === -1) {
-        if (activeStreams === -1)
-            return;
+    // Check if the number of streams have been set
+    if (streamCount === -1 && activeStreams === -1) { return; }
+    else if (activeStreams === -1) { activeStreams = streamCount; }
 
-        streamCount = activeStreams
-    }
-    else {
-        activeStreams = streamCount;
-    }
-
+    // Get overall size of the browser window (accommondate for padding) 
     let wrapperHeight = window.innerHeight - ($('#settings-wrapper').height() + 10);
     let wrapperWidth = window.innerWidth - 10;
 
+    // Set the options overlay to cover stream and chat
     $('#options-overlay').css({ 'width': wrapperWidth, 'height': wrapperHeight });
 
+    // Set the height of stream chat if required
     if (showChat === 'True') {
         $('#chat-wrapper').css('display', 'block');
 
@@ -29,12 +27,14 @@ function optimiseStreamEmbeds(streamCount, showChat) {
         $('#chat-wrapper').css('display', 'none');
     }
 
+    // Set the width of the wrapper containing stream embeds
     $('#stream-wrapper').width(wrapperWidth);
 
     let embedHeight = 0;
     let embedWidth = 0;
     let wrapperPadding = 0;
 
+    // Calculate the largest possible width and height for stream embeds
     for (let row = 1; row <= activeStreams; row++) {
         let totalRows = Math.ceil(activeStreams / row);
 
@@ -54,10 +54,12 @@ function optimiseStreamEmbeds(streamCount, showChat) {
             embedWidth = maxWidth;
             embedHeight = maxHeight;
 
+            // Adjust the padding to vertically center the embedded streams
             wrapperPadding = Math.floor((wrapperHeight - totalRows * maxHeight) / 2);
         }
     }
 
+    // Set stream embeds to calculated sides and add padding to wrapper
     $('.stream').css({ 'width': embedWidth, 'height': embedHeight });
     $('#stream-wrapper').css('padding-top', wrapperPadding);
 }
@@ -87,4 +89,27 @@ function toggleOptionsPanel() {
 
     $('#options-wrapper').css('display', visibility);
     $('#options-overlay').css('display', visibility);
+}
+
+function togglePageTheme(theme) {
+    switch (theme) {
+        case 'dark':
+            root.css('--main-background', 'var(--main-background-dark, #000)');
+            root.css('--border-color', 'var(--border-color-dark, #232323)');
+            root.css('--font-color', 'var(--font-color-dark, #fff)');
+            root.css('--settings', 'var(--settings-dark, #000)');
+            root.css('--stream-options', 'var(--stream-options-dark, #000)');
+            root.css('--overlay', 'var(--overlay-dark, #000)');
+            root.css('--chat-tabs', 'var(--chat-tabs-dark, #0F0F0F)');
+            break;
+        case 'light':
+            root.css('--main-background', 'var(--main-background-light, #fff)');
+            root.css('--border-color', 'var(--border-color-light, #DCDCDC)');
+            root.css('--font-color', 'var(--font-color-light, #000)');
+            root.css('--settings', 'var(--settings-light, #fff)');
+            root.css('--stream-options', 'var(--stream-options-light, #fff)');
+            root.css('--overlay', 'var(--overlay-light, #fff)');
+            root.css('--chat-tabs', 'var(--chat-tabs-light, #F0F0F0)');
+            break;
+    }
 }
