@@ -1,0 +1,108 @@
+﻿@model StreamDataFormModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div id="help-wrapper">
+    <div class="help-box">
+        <h1>MadMultiTwitch</h1>
+        <p>
+            Welcome to MadMultiTwitch! Like <a href="https://multitwitch.tv" target="_blank">MultiTwitch</a> but with more QoL additions.
+            This site can be used to watch any number of <a href="https://www.twitch.tv" target="_blank">Twitch</a> streams at the same time,
+            provided your computer can handle it.
+            Simply add the stream channels into the below field (a comma seperated list can be used to add in bulk).
+        </p>
+        <p>
+            Like MultiTwitch the layout of the streams will be optimised to provide the maximum viewing size while maintaining a 16:9 aspect ratio.
+            For those wondering the differences between this and the original MultiTwitch can view the source code on <a href="#" target="_blank">GitHub</a>.
+        </p>
+
+        <h3>Happy Streaming!</h3>
+    </div>
+</div>
+
+<hr />
+
+<div id="form-wrapper">
+    <form asp-controller="Stream" asp-action="Index" method="post">
+        <label asp-for="StreamList" class="form-label"></label>
+        <input type="text" id="stream-selector" class="form-field" />
+
+        <div class="form-multibuttons">
+            <input type="button" id="add-stream" class="form-button" value="Add" />
+            <input type="button" id="remove-stream" class="form-button" value="Remove" />
+        </div>
+        
+        <input asp-for="StreamList" id="parsed-streamlist" />
+        <select id="stream-list" multiple size="10" class="form-field" />
+
+        <input asp-for="DarkMode" class="form-checkbox" />
+        <label asp-for="DarkMode" class="form-checklabel"></label>
+        
+        <input asp-for="ShowChat" class="form-checkbox" />
+        <label asp-for="ShowChat" class="form-checklabel"></label>
+        
+        <input type="submit" class="form-button" value="Watch Streams" />
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(resizeContainer);
+        $(window).resize(resizeContainer);
+
+        $('#add-stream').on('click', function () {
+            var val = $('#stream-selector').val().trim();
+            console.log(val);
+
+            if (val.includes(',')) {
+                console.log('Comma list detected');
+                var arr = val.split(',').filter(element => element);
+
+                for (let i = 0; i < arr.length; i++) {
+                    addStreamToList(arr[i]);
+                }
+            }
+            else {
+                addStreamToList(val);
+            }
+            
+            $('#stream-selector').val('');
+
+            updateParsedList();
+        });
+
+        $('#remove-stream').on('click', function (e) {
+            e.preventDefault();
+
+            var streamsToRemove = $('#stream-list').val();
+
+            for (let i = 0; i < streamsToRemove.length; i++) {
+                $('option[value="'+ streamsToRemove[i] + '"]').remove();
+            }
+
+            updateParsedList();
+        });
+
+        function resizeContainer() {
+            let container = $('.container');
+
+            container.css('width', window.innerWidth - 10);
+            container.moveToAbsoluteCenter();
+        }
+
+        function addStreamToList(stream) {
+            $('#stream-list').append($('<option>', { value: stream }).text(stream));
+        }
+
+        function updateParsedList() {
+            let value = '';
+
+            $('#stream-list option').each(function() {
+                value += $(this).val() + ',';
+            });
+
+            $('#parsed-streamlist').val(value);
+        }
+    </script>
+}

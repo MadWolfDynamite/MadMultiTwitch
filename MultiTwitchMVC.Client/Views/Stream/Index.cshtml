@@ -1,0 +1,201 @@
+﻿@model StreamViewModel
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            optimiseStreamEmbeds(@Model.Streams.Count, '@Model.ShowChat');
+            $('#options-wrapper').moveToAbsoluteCenter();
+
+            $(".chat-tab-content div").first().addClass("active");
+            $(".chat-tabs li").first().addClass("active");
+
+            $('#chat-wrapper .chat-tabs').on('click', 'a', function(e) {
+                var selectedAttrValue = $(this).attr('href');
+
+                $(selectedAttrValue).show().siblings().hide();
+
+                $(this).parent('li').addClass('active').siblings().removeClass('active');
+
+                e.preventDefault();
+            });
+
+            $('#options-toggle').on('click', function(e) {
+                e.preventDefault();
+                toggleOptionsPanel();
+            });
+
+            $('#chat-toggle').on('click', function(e) {
+                e.preventDefault();
+
+                var showChatWindow = toggleChatWindow();
+                optimiseStreamEmbeds(-1, showChatWindow);
+            });
+
+            $('#light-dark-toggle').on('click', function(e) {
+                e.preventDefault();
+
+                let title = $(this).text() == 'Dark Mode'
+                    ? 'Light Mode'
+                    : 'Dark Mode';
+
+                $(this).text(title);
+            });
+
+            $('#options-wrapper .stream-options').on('change', '.stream-checkbox', updateParsedList);
+
+            $('#add-stream').on('click', function (e) {
+                e.preventDefault();
+                var val = $('#stream-selector').val().trim();
+                console.log(val);
+
+                if (val.includes(',')) {
+                    console.log('Comma list detected');
+                    var arr = val.split(',').filter(element => element);
+
+                    for (let i = 0; i < arr.length; i++) {
+                        addStreamToList(arr[i]);
+                    }
+                }
+                else {
+                    addStreamToList(val);
+                }
+
+                $('#stream-selector').val('');
+
+                updateParsedList();
+            });
+
+            $('#cancel-update').on('click', function(e) {
+                e.preventDefault();
+                toggleOptionsPanel();
+
+                $('.stream-options li').remove();
+
+                let originalVals = '@ViewData["ParsedList"]'.split(',').filter(element => element);
+
+                for (let i = 0; i < originalVals.length; i++) {
+                    addStreamToList(originalVals[i]);
+                }
+
+                $('#options-wrapper').moveToAbsoluteCenter();
+            });
+
+            $(window).resize(function () {
+                var showChatWindow = $('#chat-wrapper').css('display') === 'block'
+                    ? 'True'
+                    : 'False';
+
+                optimiseStreamEmbeds(-1, showChatWindow);
+                $('#options-wrapper').moveToAbsoluteCenter();
+            });
+        });
+
+        function addStreamToList(stream) {
+            let element = '<input type="checkbox" name="' + stream + '" id="' + stream + '" class="stream-checkbox" checked />';
+            element += '\n<label for="' + stream + '">' + stream + '</label>';
+
+            $('.stream-options').append($('<li>').html(element));
+        }
+
+        function updateParsedList() {
+            let value = '';
+
+            $('.stream-checkbox').each(function() {
+                if ($(this).prop('checked')) {
+                    value += $(this).prop('name') + ',';
+                }
+            });
+
+            $('#parsed-streamlist').val(value);
+
+            $('#options-wrapper').moveToAbsoluteCenter();
+        }
+    </script>
+}
+
+<div id="settings-wrapper">
+    @{
+        var modeToggleTitle = Model.DarkMode
+            ? "Light Mode"
+            : "Dark Mode";
+    }
+
+    <ul class="settings-tabs">
+        <li><a href="#" id="options-toggle">Update Streams</a></li>
+        <li><a href="#" id="chat-toggle">Toggle Chat</a></li>
+        <li><a href="#" id="light-dark-toggle">@modeToggleTitle</a></li>
+    </ul>
+</div>
+
+<div id="options-wrapper">
+    <form asp-controller="Stream" asp-action="Index" method="post">
+        <input type="hidden" name="StreamList" id="parsed-streamlist" value="@ViewData["ParsedList"]" />
+
+        <label class="form-label">Streams</label>
+        <ul class="stream-options">
+            @foreach (var stream in Model.Streams)
+            {
+                <li>
+                    <input type="checkbox" name="@stream" id="@stream" class="stream-checkbox" checked />
+                    <label for="@stream">@stream</label>
+                </li>
+            }
+        </ul>
+
+        <hr />
+
+        <input type="text" id="stream-selector" class="form-field" />
+        <input type="button" id="add-stream" class="form-button" value="Add" />
+        
+        <input asp-for="DarkMode" class="form-checkbox" />
+        <label asp-for="DarkMode" class="form-checklabel"></label>
+        
+        <input asp-for="ShowChat" class="form-checkbox" />
+        <label asp-for="ShowChat" class="form-checklabel"></label>
+
+        <div class="form-multibuttons">
+            <input type="button" id="cancel-update" class="form-button" value="Cancel" />
+            <input type="submit" class="form-button" value="Update" />
+        </div>   
+    </form>
+</div>
+<div id="options-overlay"></div>
+
+<div id="stream-wrapper" class="left">
+    @foreach (var stream in Model.Streams) {
+        var twitchUrl = $"https://player.twitch.tv/?channel={stream}&muted=true&parent={ViewData["DomainUrl"]}&parent=www.{ViewData["DomainUrl"]}";
+        <iframe id="embed-@stream"
+                class="stream"
+                src="@twitchUrl"
+                allowfullscreen>
+        </iframe>
+    }
+</div>
+
+<div id="chat-wrapper" class="right">
+    <ul class="chat-tabs">
+        @foreach (var stream in Model.Streams.Distinct())
+        {
+           <li><a href="#chat-@stream">@stream</a></li>
+        }
+    </ul>
+
+    <div class="chat-tab-content">
+        @foreach (var stream in Model.Streams.Distinct()) {
+            var darkModeQueryString = Model.DarkMode
+                ? "&darkpopout"
+                : "";
+
+            var twitchUrl = $"https://twitch.tv/embed/{stream}/chat?parent={ViewData["DomainUrl"]}&parent=www.{ViewData["DomainUrl"]}{darkModeQueryString}";
+            <div id="chat-@stream" class="stream-chat">
+                <iframe id="chat-@stream-embed"
+                    src="@twitchUrl"
+                    width="100%"
+                    height="100%"
+                    frameborder="0"
+                    scrolling="no">
+            </iframe>
+            </div>
+        }
+    </div>
+</div>
