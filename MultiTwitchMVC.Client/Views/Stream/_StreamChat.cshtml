@@ -1,0 +1,21 @@
+﻿@model StreamChatViewModel
+@{
+    var darkModeQueryString = Model.IsDarkMode ? "&darkpopout" : "";
+}
+
+<ul class="chat-tabs">
+    @foreach (var channel in Model.Channels.Distinct())
+    {
+        <li><a href="#chat-@channel">@channel</a></li>
+    }
+</ul>
+
+<div class="chat-tab-content">
+    @foreach (var channel in Model.Channels.Distinct())
+    {
+        var twitchUrl = $"https://twitch.tv/embed/{channel}/chat?parent={ViewData["DomainUrl"]}&parent=www.{ViewData["DomainUrl"]}{darkModeQueryString}";
+        <div id="chat-@channel" class="stream-chat">
+            <iframe id="chat-@channel-embed" src="@twitchUrl" width="100%" height="100%" frameborder="0" scrolling="no"></iframe>
+        </div>
+    }
+</div>

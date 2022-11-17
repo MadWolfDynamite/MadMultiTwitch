@@ -25,7 +25,7 @@
 
 <div id="form-wrapper">
     <form asp-controller="Stream" asp-action="Index" method="post">
-        <label asp-for="StreamList" class="form-label"></label>
+        <label asp-for="Channels" class="form-label"></label>
         <input type="text" id="stream-selector" class="form-field" />
 
         <div class="form-multibuttons">
@@ -33,11 +33,11 @@
             <input type="button" id="remove-stream" class="form-button" value="Remove" />
         </div>
         
-        <input asp-for="StreamList" id="parsed-streamlist" />
+        <input asp-for="Channels" id="parsed-streamlist" />
         <select id="stream-list" multiple size="10" class="form-field" />
 
-        <input asp-for="DarkMode" class="form-checkbox" />
-        <label asp-for="DarkMode" class="form-checklabel"></label>
+        <input asp-for="IsDarkMode" id="theme-toggle" class="form-checkbox" />
+        <label asp-for="IsDarkMode" class="form-checklabel"></label>
         
         <input asp-for="ShowChat" class="form-checkbox" />
         <label asp-for="ShowChat" class="form-checklabel"></label>
@@ -50,6 +50,11 @@
     <script>
         $(document).ready(resizeContainer);
         $(window).resize(resizeContainer);
+
+        $('#theme-toggle').on('change', function(e) {
+            if ($(this).prop('checked')) { togglePageTheme('dark'); }
+            else { togglePageTheme('light'); }
+        });
 
         $('#add-stream').on('click', function () {
             var val = $('#stream-selector').val().trim();

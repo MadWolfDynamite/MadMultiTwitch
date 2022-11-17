@@ -8,26 +8,33 @@ namespace MultiTwitchMVC.Client.Controllers
     {
         public IActionResult Index()
         {
-            var url = Request.GetDisplayUrl().Split('/', StringSplitOptions.RemoveEmptyEntries);
-            ViewData["DomainUrl"] = url[1].Split(":")[0];
-
+            ViewData["DomainUrl"] = GetDomainUrl(Request.GetDisplayUrl());
             return View(new StreamViewModel());
         }
 
         [HttpPost]
         public IActionResult Index([FromForm] StreamDataFormModel data)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) { return BadRequest(ModelState); };
 
-            var url = Request.GetDisplayUrl().Split('/', StringSplitOptions.RemoveEmptyEntries);
-            ViewData["DomainUrl"] = url[1].Split(":")[0];
+            ViewData["DomainUrl"] = GetDomainUrl(Request.GetDisplayUrl());
+            ViewData["ParsedList"] = data.Channels;
 
-            ViewData["ParsedList"] = data.StreamList;
+            return View(new StreamViewModel(data.Channels.Split(',', StringSplitOptions.RemoveEmptyEntries), data.ShowChat, data.IsDarkMode));
+        }
 
-            return View(new StreamViewModel(data.StreamList.Split(',', StringSplitOptions.RemoveEmptyEntries), data.ShowChat, data.DarkMode));
+        public IActionResult Chat(StreamChatViewModel model)
+        {
+            if (!ModelState.IsValid) { return BadRequest(model); }
+
+            ViewData["DomainUrl"] = GetDomainUrl(Request.GetDisplayUrl());
+            return PartialView("_StreamChat", model);
+        }
+
+        private static string GetDomainUrl(string url)
+        {
+            var parsedUrl = url.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            return parsedUrl[1].Split(":")[0];
         }
     }
 }

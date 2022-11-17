@@ -2,7 +2,7 @@
 
 <div id="settings-wrapper">
     @{
-        var modeToggleTitle = Model.DarkMode
+        var modeToggleTitle = Model.IsDarkMode
             ? "Dark Mode"
             : "Light Mode";
     }
@@ -16,15 +16,15 @@
 
 <div id="options-wrapper">
     <form asp-controller="Stream" asp-action="Index" method="post">
-        <input type="hidden" name="StreamList" id="parsed-streamlist" value="@ViewData["ParsedList"]" />
+        <input type="hidden" name="Channels" id="parsed-streamlist" value="@ViewData["ParsedList"]" />
 
         <label class="form-label">Streams</label>
         <ul class="stream-options">
-            @foreach (var stream in Model.Streams)
+            @foreach (var channel in Model.Channels)
             {
                 <li>
-                    <input type="checkbox" name="@stream" id="@stream" class="stream-checkbox" checked />
-                    <label for="@stream">@stream</label>
+                    <input type="checkbox" name="@channel" id="@channel" class="stream-checkbox" checked />
+                    <label for="@channel">@channel</label>
                 </li>
             }
         </ul>
@@ -34,8 +34,8 @@
         <input type="text" id="stream-selector" class="form-field" />
         <input type="button" id="add-stream" class="form-button" value="Add" />
         
-        <input asp-for="DarkMode" class="form-checkbox" />
-        <label asp-for="DarkMode" class="form-checklabel"></label>
+        <input asp-for="IsDarkMode" class="form-checkbox" />
+        <label asp-for="IsDarkMode" class="form-checklabel"></label>
         
         <input asp-for="ShowChat" class="form-checkbox" />
         <label asp-for="ShowChat" class="form-checklabel"></label>
@@ -49,7 +49,7 @@
 <div id="options-overlay"></div>
 
 <div id="stream-wrapper" class="left">
-    @foreach (var stream in Model.Streams) {
+    @foreach (var stream in Model.Channels) {
         var twitchUrl = $"https://player.twitch.tv/?channel={stream}&muted=true&parent={ViewData["DomainUrl"]}&parent=www.{ViewData["DomainUrl"]}";
         <iframe id="embed-@stream"
                 class="stream"
@@ -60,43 +60,20 @@
 </div>
 
 <div id="chat-wrapper" class="right">
-    <ul class="chat-tabs">
-        @foreach (var stream in Model.Streams.Distinct())
-        {
-           <li><a href="#chat-@stream">@stream</a></li>
-        }
-    </ul>
-
-    <div class="chat-tab-content">
-        @foreach (var stream in Model.Streams.Distinct()) {
-            var darkModeQueryString = Model.DarkMode
-                ? "&darkpopout"
-                : "";
-
-            var twitchUrl = $"https://twitch.tv/embed/{stream}/chat?parent={ViewData["DomainUrl"]}&parent=www.{ViewData["DomainUrl"]}{darkModeQueryString}";
-            <div id="chat-@stream" class="stream-chat">
-                <iframe id="chat-@stream-embed"
-                    src="@twitchUrl"
-                    width="100%"
-                    height="100%"
-                    frameborder="0"
-                    scrolling="no">
-            </iframe>
-            </div>
-        }
-    </div>
+    <partial name="_StreamChat" model="new StreamChatViewModel(Model.Channels, Model.IsDarkMode)" />
 </div>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
-            optimiseStreamEmbeds(@Model.Streams.Count, '@Model.ShowChat');
+            if ('@Model.IsDarkMode' === 'False') { togglePageTheme('light'); }
+
+            optimiseStreamEmbeds(@Model.Channels.Count, '@Model.ShowChat');
             $('#options-wrapper').moveToAbsoluteCenter();
 
-            $(".chat-tab-content div").first().addClass("active");
-            $(".chat-tabs li").first().addClass("active");
+            setSelectedChatTab();
 
-            $('#chat-wrapper .chat-tabs').on('click', 'a', function (e) {
+            $('#chat-wrapper').on('click', '.chat-tabs a', function (e) {
                 var selectedAttrValue = $(this).attr('href');
 
                 $(selectedAttrValue).show().siblings().hide();
@@ -129,6 +106,23 @@
                     togglePageTheme('dark');
                     $(this).text('Dark Mode');
                 }
+
+                var request = $.ajax({
+                    method: 'POST',
+                    url: '@Url.Action("Chat", "Stream")',
+                    data: {
+                        Channels: "@ViewData["ParsedList"]".split(',').filter(element => element),
+                        IsDarkMode: $(this).text() === 'Dark Mode'
+                    }
+                });
+
+                request.done(function (html) {
+                    $('#chat-wrapper').html(html);
+
+                    optimiseStreamEmbeds(@Model.Channels.Count, '@Model.ShowChat');
+
+                    setSelectedChatTab();
+                });
             });
 
             $('#options-wrapper .stream-options').on('change', '.stream-checkbox', updateParsedList);
@@ -180,6 +174,11 @@
             });
         });
 
+        function setSelectedChatTab() {
+            $(".chat-tab-content div").first().addClass("active");
+            $(".chat-tabs li").first().addClass("active");
+        }
+
         function addStreamToList(stream) {
             let element = '<input type="checkbox" name="' + stream + '" id="' + stream + '" class="stream-checkbox" checked />';
             element += '<label for="' + stream + '">' + stream + '</label>';
@@ -197,7 +196,6 @@
             });
 
             $('#parsed-streamlist').val(value);
-
             $('#options-wrapper').moveToAbsoluteCenter();
         }
     </script>

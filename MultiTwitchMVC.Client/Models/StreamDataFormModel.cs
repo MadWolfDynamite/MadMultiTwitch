@@ -7,22 +7,22 @@ namespace MultiTwitchMVC.Client.Models
     {
         [HiddenInput]
         [DisplayName("Channel")]
-        public string StreamList { get; set; }
+        public string Channels { get; set; }
 
         [DisplayName("Stream Chat")]
         public bool ShowChat { get; set; }
 
         [DisplayName("Dark Mode")]
-        public bool DarkMode { get; set; }
+        public bool IsDarkMode { get; set; }
 
         public StreamDataFormModel() : this(string.Empty, false, true) { }
 
-        public StreamDataFormModel(string streamList, bool showChat, bool darkMode)
+        public StreamDataFormModel(string channels, bool showChat, bool darkMode)
         {
-            StreamList = streamList;
+            Channels = channels;
 
             ShowChat = showChat;
-            DarkMode = darkMode;
+            IsDarkMode = darkMode;
         }
     }
 }

@@ -1,21 +1,25 @@
-﻿namespace MultiTwitchMVC.Client.Models
+﻿using System.ComponentModel;
+
+namespace MultiTwitchMVC.Client.Models
 {
     public class StreamViewModel
     {
-        public IList<string> Streams { get; set; }
+        public IList<string> Channels { get; set; }
 
+        [DisplayName("Stream Chat")]
         public bool ShowChat { get; set; }
 
-        public bool DarkMode { get; set; }
+        [DisplayName("Dark Mode")]
+        public bool IsDarkMode { get; set; }
 
         public StreamViewModel() : this(new List<string>(), false, true) { }
 
-        public StreamViewModel(IList<string> streams, bool showChat, bool darkMode) 
+        public StreamViewModel(IList<string> channels, bool showChat, bool darkMode) 
         { 
-            Streams = streams;
+            Channels = channels;
 
             ShowChat = showChat;
-            DarkMode = darkMode;
+            IsDarkMode = darkMode;
         }
     }
 }
