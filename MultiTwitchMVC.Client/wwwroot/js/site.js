@@ -14,7 +14,7 @@ function optimiseStreamEmbeds(streamCount, showChat) {
     $('#options-overlay').css({ 'width': wrapperWidth, 'height': wrapperHeight });
 
     // Set the height of stream chat if required
-    if (showChat === 'True') {
+    if (showChat) {
         $('#chat-wrapper').css('display', 'block');
 
         let chatWidth = $('#chat-wrapper').width();
@@ -75,11 +75,7 @@ $.fn.moveToAbsoluteCenter = function () {
 }
 
 function toggleChatWindow() {
-    let flag = $('#chat-wrapper').css('display') === 'block'
-        ? 'False'
-        : 'True';
-
-    return flag;
+    return $('#chat-wrapper').css('display') !== 'block';
 }
 
 function toggleOptionsPanel() {

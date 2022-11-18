@@ -5,6 +5,8 @@
         var modeToggleTitle = Model.IsDarkMode
             ? "Dark Mode"
             : "Light Mode";
+
+        var isChatVisible = Model.ShowChat.ToString().ToLower();
     }
 
     <ul class="settings-tabs">
@@ -34,10 +36,10 @@
         <input type="text" id="stream-selector" class="form-field" />
         <input type="button" id="add-stream" class="form-button" value="Add" />
         
-        <input asp-for="IsDarkMode" class="form-checkbox" />
+        <input asp-for="IsDarkMode" id="theme-checkbox" class="form-checkbox" />
         <label asp-for="IsDarkMode" class="form-checklabel"></label>
         
-        <input asp-for="ShowChat" class="form-checkbox" />
+        <input asp-for="ShowChat" id="chat-checkbox" class="form-checkbox" />
         <label asp-for="ShowChat" class="form-checklabel"></label>
 
         <div class="form-multibuttons">
@@ -66,15 +68,15 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            if ('@Model.IsDarkMode' === 'False') { togglePageTheme('light'); }
+            if (!@Model.IsDarkMode.ToString().ToLower()) { togglePageTheme('light'); }
 
-            optimiseStreamEmbeds(@Model.Channels.Count, '@Model.ShowChat');
+            optimiseStreamEmbeds(@Model.Channels.Count, @Model.ShowChat.ToString().ToLower());
             $('#options-wrapper').moveToAbsoluteCenter();
 
             setSelectedChatTab();
 
             $('#chat-wrapper').on('click', '.chat-tabs a', function (e) {
-                var selectedAttrValue = $(this).attr('href');
+                let selectedAttrValue = $(this).attr('href');
 
                 $(selectedAttrValue).show().siblings().hide();
 
@@ -91,8 +93,10 @@
             $('#chat-toggle').on('click', function (e) {
                 e.preventDefault();
 
-                var showChatWindow = toggleChatWindow();
+                let showChatWindow = toggleChatWindow();
                 optimiseStreamEmbeds(-1, showChatWindow);
+
+                if ($('#options-wrapper').css('display') === 'none') { $('#chat-checkbox').prop('checked', $('#chat-wrapper').css('display') === 'block'); }
             });
 
             $('#light-dark-toggle').on('click', function (e) {
@@ -107,21 +111,25 @@
                     $(this).text('Dark Mode');
                 }
 
-                var request = $.ajax({
+                let selectedAttrValue = $('#chat-wrapper .chat-tabs li.active a').attr('href');
+                let isDark = $(this).text() === 'Dark Mode';
+
+                let request = $.ajax({
                     method: 'POST',
                     url: '@Url.Action("Chat", "Stream")',
                     data: {
-                        Channels: "@ViewData["ParsedList"]".split(',').filter(element => element),
-                        IsDarkMode: $(this).text() === 'Dark Mode'
+                        Channels: '@ViewData["ParsedList"]'.split(',').filter(element => element),
+                        IsDarkMode: isDark
                     }
                 });
 
                 request.done(function (html) {
                     $('#chat-wrapper').html(html);
 
-                    optimiseStreamEmbeds(@Model.Channels.Count, '@Model.ShowChat');
+                    optimiseStreamEmbeds(@Model.Channels.Count, $('#chat-wrapper').css('display') === 'block');
+                    setSelectedChatTab(selectedAttrValue);
 
-                    setSelectedChatTab();
+                    if ($('#options-wrapper').css('display') === 'none') { $('#theme-checkbox').prop('checked', isDark); }
                 });
             });
 
@@ -129,12 +137,12 @@
 
             $('#add-stream').on('click', function (e) {
                 e.preventDefault();
-                var val = $('#stream-selector').val().trim();
+                let val = $('#stream-selector').val().trim();
                 console.log(val);
 
                 if (val.includes(',')) {
                     console.log('Comma list detected');
-                    var arr = val.split(',').filter(element => element);
+                    let arr = val.split(',').filter(element => element);
 
                     for (let i = 0; i < arr.length; i++) {
                         addStreamToList(arr[i]);
@@ -161,22 +169,27 @@
                     addStreamToList(originalVals[i]);
                 }
 
+                $('#theme-checkbox').prop('checked', $('#light-dark-toggle').text() === 'Dark Mode');
+                $('#chat-checkbox').prop('checked', $('#chat-wrapper').css('display') === 'block');
+
                 $('#options-wrapper').moveToAbsoluteCenter();
             });
 
             $(window).resize(function () {
-                var showChatWindow = $('#chat-wrapper').css('display') === 'block'
-                    ? 'True'
-                    : 'False';
-
-                optimiseStreamEmbeds(-1, showChatWindow);
+                optimiseStreamEmbeds(-1, $('#chat-wrapper').css('display') === 'block');
                 $('#options-wrapper').moveToAbsoluteCenter();
             });
         });
 
-        function setSelectedChatTab() {
-            $(".chat-tab-content div").first().addClass("active");
-            $(".chat-tabs li").first().addClass("active");
+        function setSelectedChatTab(selected) {
+            if (selected) {
+                $(selected).addClass('active');
+                $('.chat-tabs li a[href="' + selected + '"]').parent('li').addClass('active');
+            }
+            else {
+                $(".chat-tab-content div").first().addClass('active');
+                $(".chat-tabs li").first().addClass('active');
+            }
         }
 
         function addStreamToList(stream) {

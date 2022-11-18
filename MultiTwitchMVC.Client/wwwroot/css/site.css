@@ -137,7 +137,7 @@ hr {
 .form-button {
     width: 100%;
     margin: 0 10px;
-    color: var(--font-color-dark, #fff);
+    color: var(--font-color, #fff);
     background: #1f1f1f;
     background: rgba(125, 125, 125, .15);
     padding: 10px 15px;

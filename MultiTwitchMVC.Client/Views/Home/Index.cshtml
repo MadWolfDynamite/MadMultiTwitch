@@ -36,7 +36,7 @@
         <input asp-for="Channels" id="parsed-streamlist" />
         <select id="stream-list" multiple size="10" class="form-field" />
 
-        <input asp-for="IsDarkMode" id="theme-toggle" class="form-checkbox" />
+        <input asp-for="IsDarkMode" id="theme-checkbox" class="form-checkbox" />
         <label asp-for="IsDarkMode" class="form-checklabel"></label>
         
         <input asp-for="ShowChat" class="form-checkbox" />
@@ -51,7 +51,7 @@
         $(document).ready(resizeContainer);
         $(window).resize(resizeContainer);
 
-        $('#theme-toggle').on('change', function(e) {
+        $('#theme-checkbox').on('change', function (e) {
             if ($(this).prop('checked')) { togglePageTheme('dark'); }
             else { togglePageTheme('light'); }
         });
